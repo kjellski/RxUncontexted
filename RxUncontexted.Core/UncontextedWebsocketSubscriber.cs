@@ -1,20 +1,30 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.WebSockets;
+using System.Reactive.Subjects;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
+using fastJSON;
 using RxUncontexted.Parsing;
 
 namespace RxUncontexted
 {
     public class UncontextedWebsocketSubscriber
     {
-        public async void ConnectAndStartReceivingToWebSocket(String wsLiteratureUncontextCom)
+        public readonly Subject<UncontextedData> UncontextedData = new Subject<UncontextedData>();
+        private readonly string _wsLiteratureUncontextCom;
+
+        public UncontextedWebsocketSubscriber(string wsLiteratureUncontextCom)
+        {
+            _wsLiteratureUncontextCom = wsLiteratureUncontextCom;
+        }
+
+        public async void ConnectAndStartReceivingToWebSocket()
         {
             ClientWebSocket webSocket = null;
-            var uncontext = new Uri(wsLiteratureUncontextCom);
+            var uncontext = new Uri(_wsLiteratureUncontextCom);
 
             try
             {
@@ -31,6 +41,7 @@ namespace RxUncontexted
                 if (webSocket != null)
                 {
                     webSocket.Dispose();
+                    UncontextedData.OnCompleted();
                 }
                 Console.WriteLine("Closed websocket.");
             }
@@ -49,17 +60,25 @@ namespace RxUncontexted
                 }
                 else
                 {
-                    LogStatus(true, buffer, result.Count);
+                    DeserializeAndEnqueue(buffer, result.Count);
                 }
+
+                if(Console.KeyAvailable)
+                    break;
             }
         }
 
-        private void LogStatus(bool receiving, byte[] buffer, int length)
+        private void DeserializeAndEnqueue(IEnumerable<byte> buffer, int length)
         {
             var jsonString = Encoding.UTF8.GetString(buffer.Take(length).ToArray());
-            Console.WriteLine(jsonString);
-
-            var uncontexted = JsonConvert.DeserializeObject<UncontextedData>(jsonString);
+            var uncontexted = JSON.ToObject<UncontextedData>(jsonString,
+                new JSONParameters
+                {
+                    EnableAnonymousTypes = true,
+                    IgnoreCaseOnDeserialize = true,
+                    UseUTCDateTime = true
+                });
+            UncontextedData.OnNext(uncontexted);
         }
     }
 }
