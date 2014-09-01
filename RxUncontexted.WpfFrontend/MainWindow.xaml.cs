@@ -1,8 +1,7 @@
-﻿using System;
-using System.Reactive;
+﻿using System.Collections.Generic;
 using System.Windows;
+using OxyPlot;
 using RxUncontexted;
-using RxUncontexted.Parsing;
 
 namespace ReactiveWpfFrontend
 {
@@ -15,11 +14,12 @@ namespace ReactiveWpfFrontend
 
         public MainWindow()
         {
-            InitializeComponent();
-            
+            InitializeComponent();  
+
             _uncontextedDataProvider = new UncontextedWebsocketSubscriber("ws://literature.uncontext.com:80");
             InitializeWebsocket(_uncontextedDataProvider);
         }
+
 
         private void InitializeWebsocket(UncontextedWebsocketSubscriber websocketSubscriber)
         {
