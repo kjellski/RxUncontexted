@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System.Diagnostics;
+using System.Reactive;
+using System.Reactive.Subjects;
 using System.Windows;
-using OxyPlot;
 using RxUncontexted;
+using RxUncontexted.Parsing;
 
 namespace ReactiveWpfFrontend
 {
@@ -10,20 +12,26 @@ namespace ReactiveWpfFrontend
     /// </summary>
     public partial class MainWindow : Window
     {
-        private readonly UncontextedWebsocketSubscriber _uncontextedDataProvider;
+        private UncontextedDataDetailsViewModel _uncontextedDataDetailsViewModel;
 
         public MainWindow()
         {
-            InitializeComponent();  
-
-            _uncontextedDataProvider = new UncontextedWebsocketSubscriber("ws://literature.uncontext.com:80");
-            InitializeWebsocket(_uncontextedDataProvider);
+            InitializeComponent();
+            var changeSubject = InitializeWebsocket();
+            InitializeDataContext(changeSubject);
         }
 
-
-        private void InitializeWebsocket(UncontextedWebsocketSubscriber websocketSubscriber)
+        private void InitializeDataContext(Subject<UncontextedData> changeSubject)
         {
+            DataContext = this;
+            UncontextedDataDetails.DataContext = new UncontextedDataDetailsViewModel(changeSubject);
+        }
+
+        private Subject<UncontextedData> InitializeWebsocket()
+        {
+            var websocketSubscriber = new UncontextedWebsocketSubscriber("ws://literature.uncontext.com:80");
             websocketSubscriber.ConnectAndStartReceivingToWebSocket();
+            return websocketSubscriber.UncontextedData;
         }
     }
 }

@@ -63,8 +63,8 @@ namespace RxUncontexted
                     DeserializeAndEnqueue(buffer, result.Count);
                 }
 
-                if(Console.KeyAvailable)
-                    break;
+                //if(Console.KeyAvailable)
+                //    break;
             }
         }
 

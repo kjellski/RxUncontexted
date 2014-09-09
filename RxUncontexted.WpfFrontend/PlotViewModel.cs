@@ -1,14 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using OxyPlot;
 
-namespace ReactiveWpfFrontend.ViewModel
+namespace ReactiveWpfFrontend
 {
     class PlotViewModel
     {
+        private string _title;
+        private List<DataPoint> _points;
+
         public PlotViewModel()
         {
             Points = new List<DataPoint>
@@ -23,8 +22,17 @@ namespace ReactiveWpfFrontend.ViewModel
             Title = "test!";
         }
 
-        public string Title { get; private set; }
-        public IList<DataPoint> Points { get; private set; }
 
+        public string Title
+        {
+            get { return _title; }
+            private set { _title = value; }
+        }
+
+        public List<DataPoint> Points
+        {
+            get { return _points; }
+            private set { _points = value; }
+        }
     }
 }
